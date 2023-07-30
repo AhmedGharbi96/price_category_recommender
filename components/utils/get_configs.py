@@ -3,6 +3,7 @@ from typing import Optional
 
 from components.data_processing.config import DataProcessingConfig
 from components.fullrun.config import FullRunConfig
+from components.inference.config import InferenceConfig
 from components.training.config import TrainingConfig
 from components.utils.constants import BASE_CONFIG_FOLDER
 from components.utils.read_yaml import read_config
@@ -39,3 +40,14 @@ def load_fullrun_config(
         **read_config(base_config_path / "fullrun" / "config.yaml")
     )
     return fullrun_config
+
+
+def load_inference_config(
+    base_config_path: Optional[Path] = None,
+) -> InferenceConfig:
+    if not base_config_path:
+        base_config_path = BASE_CONFIG_FOLDER
+    inference_config = InferenceConfig(
+        **read_config(base_config_path / "inference" / "config.yaml")
+    )
+    return inference_config

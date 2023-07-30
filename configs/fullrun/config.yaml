@@ -3,3 +3,4 @@ random_state: 1234
 components:
   do_processing: True
   do_training: True
+  do_inference: True

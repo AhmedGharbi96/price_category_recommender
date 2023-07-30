@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 from pydantic import validator
 
@@ -7,16 +6,8 @@ from components.utils.constants import DATE_FORMAT
 from components.utils.models import CustomBaseModel
 
 
-class Components(CustomBaseModel):
-    do_processing: bool
-    do_training: bool
-    do_inference: bool
-
-
-class FullRunConfig(CustomBaseModel):
+class InferenceConfig(CustomBaseModel):
     experiment_id: str
-    random_state: Optional[int] = 1234
-    components: Components
 
     @validator("experiment_id", pre=True, always=True, allow_reuse=True)
     def set_experiment_id(cls, exp_id: str) -> str:

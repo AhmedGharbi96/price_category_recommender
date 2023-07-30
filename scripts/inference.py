@@ -1,0 +1,96 @@
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from sklearn.metrics import confusion_matrix
+
+from components.inference.config import InferenceConfig
+from components.inference.inferrer import Inferrer
+from components.inference.metrics import (
+    micro_f1_score,
+    micro_precision_score,
+    micro_recall_score,
+    plot_confusion_matrix,
+    soft_micro_f1_score,
+    soft_micro_precision_score,
+    soft_micro_recall_score,
+    weighted_cohen_kappa_score,
+)
+from components.utils.constants import DATA_FOLDER_PATH
+from components.utils.get_configs import load_inference_config
+
+
+def run_inference(config: InferenceConfig):
+    inference_data_path = DATA_FOLDER_PATH / "inference" / config.experiment_id
+    inference_data_path.mkdir(parents=True, exist_ok=True)
+    model = Inferrer(config)
+    x_test, y_test = model.load_inference_data()
+
+    # get and save predictions
+    preds = model.predict(x_test)
+    preds_df = pd.concat([x_test, pd.DataFrame({"predictions": preds})], axis=1)
+    preds_df.to_csv(inference_data_path / "x_test_predictions.csv", index=False)
+
+    # category-specific metrics
+    recall_per_cat = micro_recall_score(model, x_test, y_test, per_class_score=True)
+    soft_recall_per_cat = soft_micro_recall_score(
+        model, x_test, y_test, per_class_score=True
+    )
+
+    precision_per_cat = micro_precision_score(
+        model, x_test, y_test, per_class_score=True
+    )
+    soft_precision_per_cat = soft_micro_precision_score(
+        model, x_test, y_test, per_class_score=True
+    )
+
+    f1_per_cat = micro_f1_score(model, x_test, y_test, per_class_score=True)
+    soft_f1_per_cat = soft_micro_f1_score(model, x_test, y_test, per_class_score=True)
+
+    index = pd.Index([f"price_category {i}" for i in np.sort(np.unique(y_test))])
+    data = {
+        "recall": recall_per_cat,
+        "soft recall": soft_recall_per_cat,
+        "precision": precision_per_cat,
+        "soft precision": soft_precision_per_cat,
+        "f1": f1_per_cat,
+        "soft f1": soft_f1_per_cat,
+    }
+    cat_specific_metrics = pd.DataFrame(index=index, data=data)
+    cat_specific_metrics.to_csv(inference_data_path / "category_specific_metrics.csv")
+
+    # general performance metrics
+    recall = micro_recall_score(model, x_test, y_test, per_class_score=False)
+    soft_recall = soft_micro_recall_score(model, x_test, y_test, per_class_score=False)
+
+    precision = micro_precision_score(model, x_test, y_test, per_class_score=False)
+    soft_precision = soft_micro_precision_score(
+        model, x_test, y_test, per_class_score=False
+    )
+
+    f1 = micro_f1_score(model, x_test, y_test, per_class_score=False)
+    soft_f1 = soft_micro_f1_score(model, x_test, y_test, per_class_score=False)
+    weighted_cohen_kappa = weighted_cohen_kappa_score(model, x_test, y_test)
+    data = {
+        "recall": recall,
+        "soft recall": soft_recall,
+        "precision": precision,
+        "soft precision": soft_precision,
+        "f1": f1,
+        "soft f1": soft_f1,
+        "weighted_cohen_kappa": weighted_cohen_kappa,
+    }
+    general_performance_metrics = pd.DataFrame(data=data, index=[0])
+    general_performance_metrics.to_csv(
+        inference_data_path / "general_performance_metrics.csv"
+    )
+
+    # calculate and save confusion matrix
+    cm = confusion_matrix(y_test, preds)
+    classes = [f"price_category {i}" for i in np.sort(np.unique(y_test))]
+    plot_confusion_matrix(cm, classes)
+    plt.savefig(inference_data_path / "confusion_matrix.png")
+
+
+if __name__ == "__main__":
+    config = load_inference_config()
+    run_inference(config)
