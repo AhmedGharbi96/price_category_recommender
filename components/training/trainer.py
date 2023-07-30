@@ -18,15 +18,11 @@ class Trainer:
         clean_data_path = DATA_FOLDER_PATH / "clean" / self.config.experiment_id
         x_train = pd.read_csv(clean_data_path / "x_train.csv")
         y_train = pd.read_csv(clean_data_path / "y_train.csv")
-        categorical_columns = x_train.select_dtypes(include=["object"]).columns
-        x_train[categorical_columns] = x_train[categorical_columns].astype("category")
         x_val_path = clean_data_path / "x_val.csv"
         y_val_path = clean_data_path / "y_val.csv"
         if x_val_path.exists() and y_val_path.exists():
             x_val = pd.read_csv(x_val_path)
             y_val = pd.read_csv(y_val_path)
-            categorical_columns = x_val.select_dtypes(include=["object"]).columns
-            x_val[categorical_columns] = x_val[categorical_columns].astype("category")
         else:
             x_val, y_val = None, None
         return x_train, y_train, x_val, y_val
@@ -43,9 +39,7 @@ class Trainer:
         eval_set = None
         if x_val is not None and y_val is not None:
             eval_set = [(x_val, y_val)]
-        xgb_model = xgb.XGBClassifier(
-            **params, num_class=num_class, enable_categorical=True, tree_method="hist"
-        )
+        xgb_model = xgb.XGBClassifier(**params, num_class=num_class, tree_method="hist")
         xgb_model.fit(x_train, y_train, eval_set=eval_set)
         return xgb_model
 

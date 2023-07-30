@@ -9,6 +9,7 @@ import pandas as pd
 import statsmodels.nonparametric.kernel_density as statmKDE
 from imblearn.over_sampling import SMOTENC
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import OneHotEncoder
 
 from components.data_processing.config import DataProcessingConfig
 from components.utils.constants import DATA_FOLDER_PATH
@@ -29,7 +30,6 @@ class DataLoader:
             df (pd.DataFrame): dataframe to save
             file_name (str): name of the file
         """
-
         df.to_csv(self.clean_data_path / file_name, index=False)
 
     def load_raw_data(self, file_name: str) -> pd.DataFrame:
@@ -91,7 +91,6 @@ class DataLoader:
             Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame]]: dataframes
                 after adding the 'density' feature.
         """
-
         # fit kde on train data, then use fitted estimator on test and val
         kde = statmKDE.KDEMultivariate(
             data=np.radians(train_data[["latitude", "longitude"]]),
@@ -147,6 +146,53 @@ class DataLoader:
         x = df.loc[:, df.columns != target_name]
         y = df.loc[:, target_name]
         return x, y
+
+    def encode_categorical_feats(
+        self,
+        x_train: pd.DataFrame,
+        x_test: pd.DataFrame,
+        x_val: Optional[pd.DataFrame] = None,
+    ) -> Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame]]:
+        categorical_cols = x_train.select_dtypes(include=["object", "category"]).columns
+        encoder = OneHotEncoder(handle_unknown="ignore", sparse=False)
+        encoder.fit(x_train[categorical_cols])
+        # save encoder
+        encoder_folder = self.clean_data_path / "encoder"
+        encoder_folder.mkdir(parents=True, exist_ok=True)
+        with open(encoder_folder / "encoder.pkl", "wb") as handle:
+            pickle.dump(encoder, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+        # encode
+        x_train_encoded = encoder.transform(x_train[categorical_cols])
+        x_train_encoded_df = pd.DataFrame(
+            x_train_encoded, columns=encoder.get_feature_names_out(categorical_cols)
+        )
+        x_train_encoded_df.index = x_train.index
+        x_train_final = pd.concat(
+            [x_train.drop(categorical_cols, axis=1), x_train_encoded_df], axis=1
+        )
+
+        x_test_encoded = encoder.transform(x_test[categorical_cols])
+        x_test_encoded_df = pd.DataFrame(
+            x_test_encoded, columns=encoder.get_feature_names_out(categorical_cols)
+        )
+        x_test_encoded_df.index = x_test.index
+        x_test_final = pd.concat(
+            [x_test.drop(categorical_cols, axis=1), x_test_encoded_df], axis=1
+        )
+
+        x_val_final = None
+        if x_val is not None:
+            x_val_encoded = encoder.transform(x_val[categorical_cols])
+            x_val_encoded_df = pd.DataFrame(
+                x_val_encoded, columns=encoder.get_feature_names_out(categorical_cols)
+            )
+            x_val_encoded_df.index = x_val.index
+            x_val_final = pd.concat(
+                [x_val.drop(categorical_cols, axis=1), x_val_encoded_df], axis=1
+            )
+
+        return x_train_final, x_test_final, x_val_final
 
     def augment_training_data(
         self, x: pd.DataFrame, y: pd.DataFrame
