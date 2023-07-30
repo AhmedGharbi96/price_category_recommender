@@ -1,0 +1,12 @@
+experiment_id: null
+smote_config:
+  use_smote: True
+  min_n_samples: 5000
+  k_neighbors: 5
+kde_config:
+  bandwidth_estimate_method: normal_reference
+random_state: 1234
+raw_data_file_name: Scout24_flats_category_upd.csv
+use_validation_set: True
+test_set_n_samples: 10000
+validation_set_ratio: 0.1
