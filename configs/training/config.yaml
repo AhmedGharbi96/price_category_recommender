@@ -1,0 +1,9 @@
+experiment_id: null
+xgboost_config:
+  objective: "multi:softmax"
+  eta: 0.1
+  max_depth: 6
+  nthread: 4
+  n_estimators: 450
+  early_stopping_rounds: 10
+  random_state: 1234
