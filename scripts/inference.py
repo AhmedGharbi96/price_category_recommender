@@ -1,7 +1,9 @@
+import logging
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix
 
 from components.inference.config import InferenceConfig
 from components.inference.inferrer import Inferrer
@@ -9,7 +11,6 @@ from components.inference.metrics import (
     micro_f1_score,
     micro_precision_score,
     micro_recall_score,
-    plot_confusion_matrix,
     soft_micro_f1_score,
     soft_micro_precision_score,
     soft_micro_recall_score,
@@ -20,11 +21,14 @@ from components.utils.get_configs import load_inference_config
 
 
 def run_inference(config: InferenceConfig):
+    logging.info("**** Starting inference workflow ****")
     inference_data_path = DATA_FOLDER_PATH / "inference" / config.experiment_id
     inference_data_path.mkdir(parents=True, exist_ok=True)
+    logging.info("Loading model and data...")
     model = Inferrer(config)
     x_test, y_test = model.load_inference_data()
 
+    logging.info("Predicting test dataset...")
     # get and save predictions
     preds = model.predict_top_k(x_test, 2)
     preds_df = pd.concat(
@@ -36,6 +40,7 @@ def run_inference(config: InferenceConfig):
     )
     preds_df.to_csv(inference_data_path / "x_test_predictions.csv", index=False)
 
+    logging.info("Calculating metrics...")
     # category-specific metrics
     recall_per_cat = micro_recall_score(model, x_test, y_test, per_class_score=True)
     soft_recall_per_cat = soft_micro_recall_score(
@@ -93,8 +98,21 @@ def run_inference(config: InferenceConfig):
     # calculate and save confusion matrix
     cm = confusion_matrix(y_test, model.predict(x_test))
     classes = [f"price_category {i}" for i in np.sort(np.unique(y_test))]
-    plot_confusion_matrix(cm, classes)
-    plt.savefig(inference_data_path / "confusion_matrix.png")
+    fig = plt.figure(figsize=(10, 8), dpi=300)
+    ax = fig.add_subplot(1, 1, 1)
+    disp = ConfusionMatrixDisplay.from_predictions(
+        y_true=y_test,
+        y_pred=model.predict(x_test),
+        display_labels=classes,
+        xticks_rotation=45,
+        cmap=plt.cm.Reds,
+        ax=ax,
+    )
+    fig.tight_layout()
+    disp.plot()
+    fig.savefig(inference_data_path / "confusion_matrix.png")
+    plt.clf()
+    logging.info("Inference workflow finished successfully.")
 
 
 if __name__ == "__main__":

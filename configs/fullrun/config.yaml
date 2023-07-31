@@ -4,3 +4,4 @@ components:
   do_processing: True
   do_training: True
   do_inference: True
+  do_shap: True

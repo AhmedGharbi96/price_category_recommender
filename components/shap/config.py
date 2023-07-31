@@ -7,17 +7,10 @@ from components.utils.constants import DATE_FORMAT
 from components.utils.models import CustomBaseModel
 
 
-class Components(CustomBaseModel):
-    do_processing: bool
-    do_training: bool
-    do_inference: bool
-    do_shap: bool
-
-
-class FullRunConfig(CustomBaseModel):
+class ShapConfig(CustomBaseModel):
     experiment_id: str
     random_state: Optional[int] = 1234
-    components: Components
+    n_samples: int
 
     @validator("experiment_id", pre=True, always=True, allow_reuse=True)
     def set_experiment_id(cls, exp_id: str) -> str:

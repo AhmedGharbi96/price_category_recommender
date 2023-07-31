@@ -4,6 +4,7 @@ from typing import Optional
 from components.data_processing.config import DataProcessingConfig
 from components.fullrun.config import FullRunConfig
 from components.inference.config import InferenceConfig
+from components.shap.config import ShapConfig
 from components.training.config import TrainingConfig
 from components.utils.constants import BASE_CONFIG_FOLDER
 from components.utils.read_yaml import read_config
@@ -51,3 +52,12 @@ def load_inference_config(
         **read_config(base_config_path / "inference" / "config.yaml")
     )
     return inference_config
+
+
+def load_shap_config(
+    base_config_path: Optional[Path] = None,
+) -> ShapConfig:
+    if not base_config_path:
+        base_config_path = BASE_CONFIG_FOLDER
+    shap_config = ShapConfig(**read_config(base_config_path / "shap" / "config.yaml"))
+    return shap_config

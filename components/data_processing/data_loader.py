@@ -128,6 +128,7 @@ class DataLoader:
         plt.colorbar()
         plt.title("Points density - training data")
         plt.savefig(kde_folder / "train_data_density.png")
+        plt.clf()
         if val_data is not None:
             pdf_val = parrallel_score_samples(
                 kde, np.radians(val_data[["latitude", "longitude"]])

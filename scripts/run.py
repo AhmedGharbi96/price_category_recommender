@@ -2,10 +2,12 @@ from components.utils.get_configs import (
     load_data_processing_config,
     load_fullrun_config,
     load_inference_config,
+    load_shap_config,
     load_training_config,
 )
 from scripts.data_processing import run_data_processing
 from scripts.inference import run_inference
+from scripts.shap_values import run_shap
 from scripts.train import run_model_training
 
 
@@ -14,9 +16,11 @@ def main():
     processing_config = load_data_processing_config()
     training_config = load_training_config()
     inference_config = load_inference_config()
+    shap_config = load_shap_config()
     processing_config.experiment_id = fullrun_config.experiment_id
     training_config.experiment_id = fullrun_config.experiment_id
     inference_config.experiment_id = fullrun_config.experiment_id
+    shap_config.experiment_id = fullrun_config.experiment_id
 
     if fullrun_config.components.do_processing:
         run_data_processing(processing_config)
@@ -24,6 +28,8 @@ def main():
         run_model_training(training_config)
     if fullrun_config.components.do_inference:
         run_inference(inference_config)
+    if fullrun_config.components.do_shap:
+        run_shap(shap_config)
 
 
 if __name__ == "__main__":

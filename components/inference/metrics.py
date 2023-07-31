@@ -213,31 +213,3 @@ def weighted_cohen_kappa_score(
     """
     preds = model.predict(x)
     return cohen_kappa_score(preds, y, weights="linear")
-
-
-def plot_confusion_matrix(
-    cm, classes, normalize=False, title="Confusion Matrix", cmap=plt.cm.Reds
-):
-    plt.imshow(cm, interpolation="nearest", cmap=cmap)
-    plt.title(title)
-    plt.colorbar()
-
-    tick_marks = np.arange(len(classes))
-    plt.xticks(tick_marks, classes, rotation=45)
-    plt.yticks(tick_marks, classes)
-
-    if normalize:
-        cm = cm.astype("float") / cm.sum(axis=1)[:, np.newaxis]
-
-    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
-        plt.text(
-            j,
-            i,
-            format(cm[i, j], ".2f" if normalize else "d"),
-            horizontalalignment="center",
-            color="black" if cm[i, j] > sum(cm[:, j]) / 2.0 else "red",
-        )
-
-    plt.tight_layout()
-    plt.ylabel("True label")
-    plt.xlabel("Predicted label")
