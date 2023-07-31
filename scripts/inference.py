@@ -26,8 +26,14 @@ def run_inference(config: InferenceConfig):
     x_test, y_test = model.load_inference_data()
 
     # get and save predictions
-    preds = model.predict(x_test)
-    preds_df = pd.concat([x_test, pd.DataFrame({"predictions": preds})], axis=1)
+    preds = model.predict_top_k(x_test, 2)
+    preds_df = pd.concat(
+        [
+            x_test,
+            pd.DataFrame({"first_range": preds[:, 0], "second_range": preds[:, 1]}),
+        ],
+        axis=1,
+    )
     preds_df.to_csv(inference_data_path / "x_test_predictions.csv", index=False)
 
     # category-specific metrics
@@ -85,7 +91,7 @@ def run_inference(config: InferenceConfig):
     )
 
     # calculate and save confusion matrix
-    cm = confusion_matrix(y_test, preds)
+    cm = confusion_matrix(y_test, model.predict(x_test))
     classes = [f"price_category {i}" for i in np.sort(np.unique(y_test))]
     plot_confusion_matrix(cm, classes)
     plt.savefig(inference_data_path / "confusion_matrix.png")
