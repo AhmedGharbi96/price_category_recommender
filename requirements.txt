@@ -1,0 +1,14 @@
+dash==2.10.0
+imbalanced-learn==0.10.1
+matplotlib==3.5.1
+numpy==1.21.6
+pandas==1.4.3
+Pillow==10.0.0
+plotly==5.14.1
+pydantic==1.9.0
+PyYAML==6.0.1
+scikit-learn==1.2.2
+statsmodels==0.13.5
+xgboost==1.7.4
+shap==0.41.0
+kaleido==0.2.1
