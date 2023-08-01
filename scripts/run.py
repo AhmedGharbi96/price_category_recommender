@@ -1,4 +1,4 @@
-from components.dashboard.app import build_app
+
 from components.dashboard.app_setup import app
 from components.utils.get_configs import (load_dashboard_config,
                                           load_data_processing_config,
@@ -11,6 +11,10 @@ from scripts.inference import run_inference
 from scripts.shap_values import run_shap
 from scripts.train import run_model_training
 
+# Importing build_app before run_data_processing causes a weird bug.
+# The problem is caused by conflicts between shap-imblearn
+# we disable import re-ordering here.
+from components.dashboard.app import build_app
 
 def main():
     fullrun_config = load_fullrun_config()

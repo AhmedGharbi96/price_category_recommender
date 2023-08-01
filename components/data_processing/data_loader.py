@@ -155,7 +155,7 @@ class DataLoader:
         x_val: Optional[pd.DataFrame] = None,
     ) -> Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame]]:
         categorical_cols = x_train.select_dtypes(include=["object", "category"]).columns
-        encoder = OneHotEncoder(handle_unknown="ignore", sparse=False)
+        encoder = OneHotEncoder(handle_unknown="ignore", sparse_output=False)
         encoder.fit(x_train[categorical_cols])
         # save encoder
         encoder_folder = self.clean_data_path / "encoder"

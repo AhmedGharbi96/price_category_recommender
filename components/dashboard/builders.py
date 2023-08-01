@@ -2,7 +2,6 @@ from dash import dash_table, html
 
 from components.dashboard.config import DashboardConfig
 from components.dashboard.ui_components.local_explainer import LocalExplainerComponent
-from components.utils.get_configs import load_dashboard_config
 
 
 def build_local_explainer_component(config: DashboardConfig):
@@ -22,7 +21,7 @@ def build_table(df, id, row_selectable=False):
         children=dash_table.DataTable(
             df.to_dict("records"),
             [{"name": i, "id": i} for i in df.columns],
-            row_selectable="single",
+            row_selectable=row_selectable,
             style_table={
                 "overflowX": "scroll",
                 "max-height": "500px",
