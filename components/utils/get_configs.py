@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Optional
 
+from components.dashboard.config import DashboardConfig
 from components.data_processing.config import DataProcessingConfig
 from components.fullrun.config import FullRunConfig
 from components.inference.config import InferenceConfig
@@ -61,3 +62,14 @@ def load_shap_config(
         base_config_path = BASE_CONFIG_FOLDER
     shap_config = ShapConfig(**read_config(base_config_path / "shap" / "config.yaml"))
     return shap_config
+
+
+def load_dashboard_config(
+    base_config_path: Optional[Path] = None,
+) -> DashboardConfig:
+    if not base_config_path:
+        base_config_path = BASE_CONFIG_FOLDER
+    dashboard_config = DashboardConfig(
+        **read_config(base_config_path / "dashboard" / "config.yaml")
+    )
+    return dashboard_config

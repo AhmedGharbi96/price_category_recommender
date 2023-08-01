@@ -67,7 +67,10 @@ def run_inference(config: InferenceConfig):
         "soft f1": soft_f1_per_cat,
     }
     cat_specific_metrics = pd.DataFrame(index=index, data=data)
-    cat_specific_metrics.to_csv(inference_data_path / "category_specific_metrics.csv")
+    cat_specific_metrics.to_csv(
+        inference_data_path / "category_specific_metrics.csv",
+        index_label="category",
+    )
 
     # general performance metrics
     recall = micro_recall_score(model, x_test, y_test, per_class_score=False)
@@ -92,7 +95,8 @@ def run_inference(config: InferenceConfig):
     }
     general_performance_metrics = pd.DataFrame(data=data, index=[0])
     general_performance_metrics.to_csv(
-        inference_data_path / "general_performance_metrics.csv"
+        inference_data_path / "general_performance_metrics.csv",
+        index=False,
     )
 
     # calculate and save confusion matrix

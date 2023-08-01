@@ -20,8 +20,9 @@ def run_data_processing(config: DataProcessingConfig):
     x_val, y_val = None, None
     if config.use_validation_set:
         x_val, y_val = loader.split_to_feat_and_target(val)
-    logging.info("Oversampling using SMOTE-NC...")
-    x_train, y_train = loader.augment_training_data(x_train, y_train)
+    if config.smote_config.use_smote:
+        logging.info("Oversampling using SMOTE-NC...")
+        x_train, y_train = loader.augment_training_data(x_train, y_train)
     logging.info("Encoding categorical features")
     x_train, x_test, x_val = loader.encode_categorical_feats(x_train, x_test, x_val)
     logging.info("Saving clean data...")

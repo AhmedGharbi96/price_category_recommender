@@ -1,7 +1,8 @@
-experiment_id: null
+experiment_id: final_run
 random_state: 1234
 components:
   do_processing: True
   do_training: True
   do_inference: True
   do_shap: True
+  do_dashboard: True
